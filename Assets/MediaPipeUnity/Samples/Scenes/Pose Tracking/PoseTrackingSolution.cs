@@ -21,7 +21,18 @@ namespace Mediapipe.Unity.PoseTracking
 
     [SerializeField]
     //private MedPipe2SMPL Converter;
+    private MedPipe2HumanoidAvatar[] ConvList = new MedPipe2HumanoidAvatar[2];
+    [SerializeField]
     private MedPipe2HumanoidAvatar Converter;
+    [SerializeField]
+    private int genNum = 0;
+
+    public void alterConverter()
+    {
+      if(this.genNum == 0) { genNum = 1; }
+      else { genNum = 0; }
+      Converter = ConvList[genNum];
+    }
 
     public PoseTrackingGraph.ModelComplexity modelComplexity
     {
