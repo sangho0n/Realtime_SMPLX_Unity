@@ -1,0 +1,23 @@
+name: Other Issue
+description: Fallback form. Use this for any other issues.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a fallback form.
+
+        If you cannot find more appropriate form, please use this form.\
+        For example, you can use it when asking questions about the internal implementation.
+
+        * If you don't know how to use MediaPipe itself, please ask it in the official community.
+        * Check to see if there's a more appropriate [form](https://github.com/homuler/MediaPipeUnityPlugin/issues/new/choose).
+        * Check to make sure someone hasn't already opened a similar [issue](https://github.com/homuler/MediaPipeUnityPlugin/issues).
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: |
+        Describe your issue.\
+        Be careful to include all the context needed to understand it.
+    validations:
+      required: true
