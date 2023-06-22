@@ -3690,7 +3690,7 @@ MonoBehaviour:
   genderModels:
   - {fileID: 785044719}
   - {fileID: 1312816930}
-  inputField: {fileID: 0}
+  inputField: {fileID: 1766932729}
   gen: 0
   ipConf: {fileID: 4900000, guid: 01dada88dd6572394bc0aaaacbc253e1, type: 3}
 --- !u!1 &1936307553

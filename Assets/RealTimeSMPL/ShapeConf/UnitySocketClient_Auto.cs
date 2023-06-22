@@ -24,7 +24,7 @@ public class UnitySocketClient_Auto : MonoBehaviour
 
   //private int num = 0;
   Byte[] result;
-  Byte[] ans = new byte[608]; //float인데, 8byte가 : 80+24+63*8 = 608
+  Byte[] ans = new byte[80]; //float인데, 8byte가 : 80+24+63*8 = 608
   float[] val = new float[10];
   public byte gen = 0;
   double[] body_pose = new double[66];
@@ -206,6 +206,7 @@ public class UnitySocketClient_Auto : MonoBehaviour
   {
     try
     {
+      sr = new StringReader(ipConf.text);
       hostname = sr.ReadLine();
       port = int.Parse(sr.ReadLine());
     }
