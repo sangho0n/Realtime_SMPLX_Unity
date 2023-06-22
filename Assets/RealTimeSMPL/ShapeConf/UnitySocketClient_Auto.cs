@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
@@ -32,6 +33,12 @@ public class UnitySocketClient_Auto : MonoBehaviour
   private float height_M = 178.1f;
   private float midHeight_M = 0.5465f;
   [SerializeField] private TextAsset ipConf;
+  private StringReader sr;
+
+  private void Start()
+  {
+    sr = new StringReader(ipConf.text);
+  }
 
   public void alterGen()
   {
@@ -74,7 +81,6 @@ public class UnitySocketClient_Auto : MonoBehaviour
       string hostname;
       int port;
       ParseIpConf(out hostname, out port);
-      Debug.Log(hostname + ", " + port);
       socketConnection = new TcpClient(hostname, port);
       //Debug.Log("Connecting Done");
     }
@@ -198,9 +204,17 @@ public class UnitySocketClient_Auto : MonoBehaviour
 
   private void ParseIpConf(out string hostname, out int port)
   {
-    string[] tokens = ipConf.text.Split("\n");
-    hostname = tokens[0];
-    port = int.Parse(tokens[1]);
+    try
+    {
+      hostname = sr.ReadLine();
+      port = int.Parse(sr.ReadLine());
+    }
+    catch (Exception e)
+    {
+      Debug.LogWarning(e.Message);
+      hostname = null;
+      port = 0;
+    }
   }
 
   public void Quit()
