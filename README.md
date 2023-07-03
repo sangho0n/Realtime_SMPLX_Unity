@@ -1,28 +1,52 @@
 ![Unity icon](https://images.contentstack.io/v3/assets/blt08c1239a7bff8ff5/bltdff1a2920dd347a5/63f5068a97790d11728d0a6d/U_Logo_Small_black.svg)
 
 <h2 align="center">
-Realtime motion capture from a single monocular RGB webcam in Unity
+SMPL character animation in Unity
 
-that moves SMPLX mesh reconstructed from an arbitrary model
+with real-time estimated pose from a single monocular RGB image
 </h2>
 
 ------------
 
+# About
+
+There are so many models estimating human pose with shape reconstruction using smpl-like model.
+[Expose](https://github.com/vchoutas/expose), [VIBE](https://github.com/mkocabas/VIBE), 
+[HuManiFlow](https://github.com/akashsengupta1997/HuManiFlow) are some of those examples. 
+Sometimes, they could reconstruct human pose in real-time quite well.
+But it is hard to import those on Unity because of the onnx-barracuda problem.
+Even if it is possible, the accuracy drops when converting python model to onnx model, and might be hard to be conducted in real-time.
+
+So, we decided to split it as two sub modules, shape reconstruction and pose estimation.
+Shape reconstruction is done by python server. When client(Unity side) requests to get current frame's human shape information, byte-converted current frame image is sent to server and wait for response asynchronously.
+When server receives image data, it would be cropped or padded to desired size for its own Smpl-like mesh inference model and forwarded to that model. 
+After inference, shape parameters(betas) are packed into response packet, sent to client, and connections is closed.
+
+Pose estimation is done by Unity itself. 
+
+--------------
+
 # Architecture
+Here is an architecture image 
 ![architecture.png](readmeImg%2Farchitecture.png)
 
 -------------
 
-# Smplx server API
+# Shape Reconstruction
 
 ### Note that
-You have to maintain your own Smplx Reconstruction Server, if you want to set Smplx body shapes automatically. 
+You have to maintain your own Smplx Reconstruction Server, if you want to set Smplx body shapes automatically. Those two endpoint would be connected  by TCP
 
-You can make .txt file containing hostname(ip addr) and port number, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
-By assigning it to UnitySocketCleint_auto.cs script's IpConf variable(the script is located at Main Canvas > ContainerPanel > Body > Annotatable Screen),
-it will send an image frame, receive betas and pass it to smplx mesh sequentially.
+You can make .txt file containing a hostname(ip addr) and a port number, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
+By assigning it to UnitySocketCleint_auto.cs script's IpConf variable,
+it will send an image frame, receive betas and pass it to the target smplx mesh sequentially.
 
-Hostname and port number must be split by ``"/n"`` like this
+The script is located at
+
+    Main Canvas > ContainerPanel > Body > Annotatable Screen
+in the RealTimeSMPLX scene.
+
+Hostname and port number must be split by "line separator" like this
 ```text
 xxx.xxx.xx.xxx
 0000
@@ -30,6 +54,16 @@ xxx.xxx.xx.xxx
 
 ### API specification
 
+- request
+
+![img.png](img.png)
+
+
+- response
+
+![img_1.png](img_1.png)
+
+those two byte arrays are passed on tcp stream
 
 -------------
 
@@ -37,7 +71,11 @@ xxx.xxx.xx.xxx
 You can find demo scene at ``./RealTimeSMPL/Scene/RealTimeSMPLX``. 
 ## Tested Environment
 
-## 
+------------
+
+# Pose Estimation
+
+------------
 
 # References
 
