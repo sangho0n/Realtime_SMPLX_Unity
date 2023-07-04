@@ -72,7 +72,7 @@ public class RealTimeSMPLX : SMPLX
 
         // Bones
         public Transform Transform = null;
-        public Quaternion InitRotation;
+        public Quaternion DefaultPoseRotation;
         public Quaternion Inverse;
         public Quaternion InverseRotation;
 
@@ -83,15 +83,6 @@ public class RealTimeSMPLX : SMPLX
         public Vector3 P = new Vector3();
         public Vector3 X = new Vector3();
         public Vector3 K = new Vector3();
-    }
-
-    public class Skeleton
-    {
-        public GameObject LineObject;
-        public LineRenderer Line;
-
-        public JointPoint start = null;
-        public JointPoint end = null;
     }
 
     // Joint position and bone
@@ -105,12 +96,6 @@ public class RealTimeSMPLX : SMPLX
 
     public GameObject Nose;
     private Animator anim;
-
-    // Move in z direction
-    private float centerTall = 224 * 0.75f;
-    private float tall = 224 * 0.75f;
-    private float prevTall = 224 * 0.75f;
-    public float ZScale = 0.8f;
 
     private Camera _mainCamera;
 
@@ -156,12 +141,8 @@ public class RealTimeSMPLX : SMPLX
         jointPoints[PositionIndex.left_pinky.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.LeftLittleProximal);
 
         // Face
-        //jointPoints[PositionIndex.left_ear.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.Head);
-        jointPoints[PositionIndex.left_eye.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.LeftEye);
-        jointPoints[PositionIndex.left_eye.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.RightEye);
-        //jointPoints[PositionIndex.right_ear.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.Head);
+        jointPoints[PositionIndex.left_eye.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.LeftEye); 
         jointPoints[PositionIndex.right_eye.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.RightEye);
-        jointPoints[PositionIndex.right_eye.Int()].Transform = anim.GetBoneTransform(HumanBodyBones.LeftEye);
         jointPoints[PositionIndex.nose.Int()].Transform = Nose.transform;
 
         // Right Leg
@@ -186,29 +167,30 @@ public class RealTimeSMPLX : SMPLX
         // Right Arm
         jointPoints[PositionIndex.right_shoulder.Int()].Child = jointPoints[PositionIndex.right_elbow.Int()];
         jointPoints[PositionIndex.right_elbow.Int()].Child = jointPoints[PositionIndex.right_wrist.Int()];
+        jointPoints[PositionIndex.right_wrist.Int()].Parent = jointPoints[PositionIndex.right_elbow.Int()];
         jointPoints[PositionIndex.right_elbow.Int()].Parent = jointPoints[PositionIndex.right_shoulder.Int()];
 
         // Left Arm
         jointPoints[PositionIndex.left_shoulder.Int()].Child = jointPoints[PositionIndex.left_elbow.Int()];
         jointPoints[PositionIndex.left_elbow.Int()].Child = jointPoints[PositionIndex.left_wrist.Int()];
+        jointPoints[PositionIndex.left_wrist.Int()].Parent = jointPoints[PositionIndex.left_elbow.Int()];
         jointPoints[PositionIndex.left_elbow.Int()].Parent = jointPoints[PositionIndex.left_shoulder.Int()];
-
-        // Fase
 
         // Right Leg
         jointPoints[PositionIndex.right_hip.Int()].Child = jointPoints[PositionIndex.right_knee.Int()];
         jointPoints[PositionIndex.right_knee.Int()].Child = jointPoints[PositionIndex.right_ankle.Int()];
         jointPoints[PositionIndex.right_ankle.Int()].Child = jointPoints[PositionIndex.right_foot_index.Int()];
+        jointPoints[PositionIndex.right_foot_index.Int()].Parent = jointPoints[PositionIndex.right_ankle.Int()];
         jointPoints[PositionIndex.right_ankle.Int()].Parent = jointPoints[PositionIndex.right_knee.Int()];
+        jointPoints[PositionIndex.right_knee.Int()].Parent = jointPoints[PositionIndex.right_hip.Int()];
 
         // Left Leg
         jointPoints[PositionIndex.left_hip.Int()].Child = jointPoints[PositionIndex.left_knee.Int()];
         jointPoints[PositionIndex.left_knee.Int()].Child = jointPoints[PositionIndex.left_ankle.Int()];
         jointPoints[PositionIndex.left_ankle.Int()].Child = jointPoints[PositionIndex.left_foot_index.Int()];
+        jointPoints[PositionIndex.right_foot_index.Int()].Parent = jointPoints[PositionIndex.left_ankle.Int()];
         jointPoints[PositionIndex.left_ankle.Int()].Parent = jointPoints[PositionIndex.left_knee.Int()];
-
-        // etc        
-        //jointPoints[PositionIndex.head.Int()].Child = jointPoints[PositionIndex.nose.Int()];
+        jointPoints[PositionIndex.left_knee.Int()].Parent = jointPoints[PositionIndex.left_hip.Int()];
 
         // Set Inverse
         var forward = TriangleNormal(pseudoNeckPosition, jointPoints[PositionIndex.left_hip.Int()].Transform.position, jointPoints[PositionIndex.right_hip.Int()].Transform.position);
@@ -216,38 +198,38 @@ public class RealTimeSMPLX : SMPLX
         {
             if (jointPoint.Transform != null)
             {
-                jointPoint.InitRotation = jointPoint.Transform.rotation;
+                jointPoint.DefaultPoseRotation = jointPoint.Transform.rotation;
             }
 
             if (jointPoint.Child != null)
             {
                 jointPoint.Inverse = GetInverse(jointPoint, jointPoint.Child, forward);
-                jointPoint.InverseRotation = jointPoint.Inverse * jointPoint.InitRotation;
+                jointPoint.InverseRotation = jointPoint.Inverse * jointPoint.DefaultPoseRotation;
             }
         }
         var hip = jointPoints[PositionIndex.hip.Int()];
         rootPosition = _mainCamera.transform.position + new Vector3(0, 0, 5.0f);
         hip.Inverse = Quaternion.Inverse(Quaternion.LookRotation(forward));
-        hip.InverseRotation = hip.Inverse * hip.InitRotation;
+        hip.InverseRotation = hip.Inverse * hip.DefaultPoseRotation;
 
         // For Head Rotation
         var head = jointPoints[PositionIndex.head.Int()];
-        head.InitRotation = jointPoints[PositionIndex.head.Int()].Transform.rotation;
+        head.DefaultPoseRotation = jointPoints[PositionIndex.head.Int()].Transform.rotation;
         var gaze = jointPoints[PositionIndex.nose.Int()].Transform.position - jointPoints[PositionIndex.head.Int()].Transform.position;
         head.Inverse = Quaternion.Inverse(Quaternion.LookRotation(gaze));
-        head.InverseRotation = head.Inverse * head.InitRotation;
+        head.InverseRotation = head.Inverse * head.DefaultPoseRotation;
         
         var lHand = jointPoints[PositionIndex.left_wrist.Int()];
         var lf = TriangleNormal(lHand.Pos3D, jointPoints[PositionIndex.left_pinky.Int()].Pos3D, jointPoints[PositionIndex.left_index.Int()].Pos3D);
-        lHand.InitRotation = lHand.Transform.rotation;
+        lHand.DefaultPoseRotation = lHand.Transform.rotation;
         lHand.Inverse = Quaternion.Inverse(Quaternion.LookRotation(jointPoints[PositionIndex.left_index.Int()].Transform.position - jointPoints[PositionIndex.left_pinky.Int()].Transform.position, lf));
-        lHand.InverseRotation = lHand.Inverse * lHand.InitRotation;
-
+        lHand.InverseRotation = lHand.Inverse * lHand.DefaultPoseRotation;
+        
         var rHand = jointPoints[PositionIndex.right_wrist.Int()];
         var rf = TriangleNormal(rHand.Pos3D, jointPoints[PositionIndex.right_index.Int()].Pos3D, jointPoints[PositionIndex.right_pinky.Int()].Pos3D);
-        rHand.InitRotation = jointPoints[PositionIndex.right_wrist.Int()].Transform.rotation;
+        rHand.DefaultPoseRotation = jointPoints[PositionIndex.right_wrist.Int()].Transform.rotation;
         rHand.Inverse = Quaternion.Inverse(Quaternion.LookRotation(jointPoints[PositionIndex.right_index.Int()].Transform.position - jointPoints[PositionIndex.right_pinky.Int()].Transform.position, rf));
-        rHand.InverseRotation = rHand.Inverse * rHand.InitRotation;
+        rHand.InverseRotation = rHand.Inverse * rHand.DefaultPoseRotation;
 
         return JointPoints;
     }
@@ -256,43 +238,17 @@ public class RealTimeSMPLX : SMPLX
     {
         // calculate movement range of z-coordinate from height
         var pseudoNeckPosition = (jointPoints[PositionIndex.left_shoulder.Int()].Pos3D + jointPoints[PositionIndex.right_shoulder.Int()].Pos3D) / 2.0f;
-        var t1 = Vector3.Distance(pseudoNeckPosition, jointPoints[PositionIndex.head.Int()].Pos3D);
-        var t2 = Vector3.Distance(pseudoNeckPosition, jointPoints[PositionIndex.spine.Int()].Pos3D);
-        var t3 = Vector3.Distance(jointPoints[PositionIndex.spine.Int()].Pos3D, jointPoints[PositionIndex.hip.Int()].Pos3D);
-        var t4r = Vector3.Distance(jointPoints[PositionIndex.right_hip.Int()].Pos3D, jointPoints[PositionIndex.right_knee.Int()].Pos3D);
-        var t4l = Vector3.Distance(jointPoints[PositionIndex.left_hip.Int()].Pos3D, jointPoints[PositionIndex.left_knee.Int()].Pos3D);
-        var t4 = (t4r + t4l) / 2f;
-        var t5r = Vector3.Distance(jointPoints[PositionIndex.right_knee.Int()].Pos3D, jointPoints[PositionIndex.right_ankle.Int()].Pos3D);
-        var t5l = Vector3.Distance(jointPoints[PositionIndex.left_knee.Int()].Pos3D, jointPoints[PositionIndex.left_ankle.Int()].Pos3D);
-        var t5 = (t5r + t5l) / 2f;
-        var t = t1 + t2 + t3 + t4 + t5;
-
-
-        // Low pass filter in z direction
-        tall = t * 0.7f + prevTall * 0.3f;
-        prevTall = tall;
-
-        if (tall == 0)
-        {
-            tall = centerTall;
-        }
-        var dz = (centerTall - tall) / centerTall * ZScale;
 
         // movement and rotatation of center
-        var currentRoot = rootPosition;// + new Vector3(jointPoints[PositionIndex.hip.Int()].Pos3D.x,0,jointPoints[PositionIndex.hip.Int()].Pos3D.z) * 10.0f;
+        var currentRoot = rootPosition;
         var forward = -TriangleNormal(pseudoNeckPosition, jointPoints[PositionIndex.left_hip.Int()].Pos3D, jointPoints[PositionIndex.right_hip.Int()].Pos3D);
-        jointPoints[PositionIndex.hip.Int()].Transform.position = jointPoints[PositionIndex.hip.Int()].Pos3D * 0.005f + new Vector3(currentRoot.x, currentRoot.y, currentRoot.z + dz);
+        jointPoints[PositionIndex.hip.Int()].Transform.position = currentRoot;
         jointPoints[PositionIndex.hip.Int()].Transform.rotation = Quaternion.LookRotation(forward) * jointPoints[PositionIndex.hip.Int()].InverseRotation;
 
         // rotate each of bones
         foreach (var jointPoint in jointPoints)
         {
-            if (jointPoint.Parent != null)
-            {
-                var fv = jointPoint.Parent.Pos3D - jointPoint.Pos3D;
-                jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Pos3D - jointPoint.Child.Pos3D, -fv) * jointPoint.InverseRotation;
-            }
-            else if (jointPoint.Child != null)
+            if (jointPoint.Child != null)
             {
                 jointPoint.Transform.rotation = Quaternion.LookRotation(jointPoint.Pos3D - jointPoint.Child.Pos3D, forward) * jointPoint.InverseRotation;
             }
