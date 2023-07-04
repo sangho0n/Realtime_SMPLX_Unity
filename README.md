@@ -3,7 +3,7 @@
 <h2 align="center">
 SMPL character animation in Unity
 
-with real-time estimated pose from a single monocular RGB image
+with real-time estimated 3D pose from a single monocular RGB image
 </h2>
 
 ------------
@@ -18,16 +18,18 @@ But it is hard to import those on Unity because of the onnx-barracuda problem.
 Even if it is possible, the accuracy drops when converting python model to onnx model, and might be hard to be conducted in real-time.
 
 So, we decided to split it as two sub modules, shape reconstruction and pose estimation.
-Shape reconstruction is done by python server. When client(Unity side) requests to get current frame's human shape information, byte-converted current frame image is sent to server and wait for response asynchronously.
-When server receives image data, it would be cropped or padded to desired size for its own Smpl-like mesh inference model and forwarded to that model. 
-After inference, shape parameters(betas) are packed into response packet, sent to client, and connections is closed.
+Shape reconstruction is done by a python server. When client(Unity side) requests to get current frame's human shape information, byte-converted frame image is sent to the server and waiting for a response asynchronously.
+When server receives image data, it would be cropped or padded to the desired size for its own Smpl-like mesh inference model(we used [HuManiFlow](https://github.com/akashsengupta1997/HuManiFlow) for demo) and forwarded to that model. 
+After inference, shape parameters(betas) are packed into response message , sent to client, and connection is closed.
 
-Pose estimation is done by Unity itself. 
+Pose estimation is done by Unity itself. We selected [MediaPipe](https://developers.google.com/mediapipe) for pose estimation([MediaPipeUnityPlugin](https://github.com/homuler/MediaPipeUnityPlugin); Pre-developed Plugin are there already).
+Thanks to [homuler](https://ko-fi.com/homuler)(the author of the plugin), we could get 3d pose estimated data without networking.
+
 
 --------------
 
 # Architecture
-Here is an architecture image 
+Here is an architecture image.
 ![architecture.png](readmeImg%2Farchitecture.png)
 
 -------------
@@ -35,16 +37,16 @@ Here is an architecture image
 # Shape Reconstruction
 
 ### Note that
-You have to maintain your own Smplx Reconstruction Server, if you want to set Smplx body shapes automatically. Those two endpoint would be connected  by TCP
+You have to maintain your own Smplx Reconstruction Server, if you want to set Smplx body shapes automatically. Those two endpoint would be connected  by TCP.
 
-You can make .txt file containing a hostname(ip addr) and a port number, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
+You can make .txt file containing a hostname(ip addr) and a port number of inference server, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
 By assigning it to UnitySocketCleint_auto.cs script's IpConf variable,
 it will send an image frame, receive betas and pass it to the target smplx mesh sequentially.
 
 The script is located at
 
     Main Canvas > ContainerPanel > Body > Annotatable Screen
-in the RealTimeSMPLX scene.
+in the Assets > RealTimeSMPL > Scene > RealTimeSMPLX.unity scene's Hierarchy window.
 
 Hostname and port number must be split by "line separator" like this
 ```text
@@ -56,32 +58,44 @@ xxx.xxx.xx.xxx
 
 - request
 
-![img.png](img.png)
-
+![req.png](readmeImg%2Freq.png)
 
 - response
 
-![img_1.png](img_1.png)
+![res.png](readmeImg%2Fres.png)
 
-those two byte arrays are passed on tcp stream
+Those two byte arrays are passed on tcp stream. Request form would be passed on the stream correctly if you assigned valid value on IpConf variable.
+You have to obey response message form when implementing inference server.
 
 -------------
 
-# Demo
-You can find demo scene at ``./RealTimeSMPL/Scene/RealTimeSMPLX``. 
-## Tested Environment
-
-------------
-
 # Pose Estimation
 
+We used [MediaPipe](https://developers.google.com/mediapipe) framework for 3D pose estimation. 
+
+![mediaPipeJoints.png](readmeImg%2FmediaPipeJoints.png)
+
+The estimated data contains each joint's rotation angles. 
+
 ------------
+
+# Demo
+You can find demo scene at ``./RealTimeSMPL/Scene/RealTimeSMPLX``. Run the scene and see your smpl avatar dancing just like you.
+
+If you constructed your own smpl human mesh reconstruction server and configured connection correctly, the smpl mesh's shape changes every time you push down space bar or right-click your mouse.
+
+## Tested Environment
+
+// TODO : notify test envs and demo video-gif
+
+------------
+
 
 # References
 
 - [MediaPipeUnityPlugin github repository](https://github.com/homuler/MediaPipeUnityPlugin)
 - [smplx github repository](https://github.com/vchoutas/smplx)
-
+- [rigging and animation code reference](https://github.com/digital-standard/ThreeDPoseUnityBarracuda)
 
 <details>
 	<summary>Original README from MediaPipeUnityPlugin repository</summary>
