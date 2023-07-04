@@ -239,9 +239,9 @@ public class RealTimeSMPLX : SMPLX
         // calculate movement range of z-coordinate from height
         var pseudoNeckPosition = (jointPoints[PositionIndex.left_shoulder.Int()].Pos3D + jointPoints[PositionIndex.right_shoulder.Int()].Pos3D) / 2.0f;
 
-        // movement and rotatation of center
+        // movement and rotation of center
         var currentRoot = rootPosition;
-        var forward = -TriangleNormal(pseudoNeckPosition, jointPoints[PositionIndex.left_hip.Int()].Pos3D, jointPoints[PositionIndex.right_hip.Int()].Pos3D);
+        var forward = -TriangleNormal(pseudoNeckPosition, jointPoints[PositionIndex.left_hip.Int()].Pos3D, jointPoints[PositionIndex.right_hip.Int()].Pos3D); // mirrored body
         jointPoints[PositionIndex.hip.Int()].Transform.position = currentRoot;
         jointPoints[PositionIndex.hip.Int()].Transform.rotation = Quaternion.LookRotation(forward) * jointPoints[PositionIndex.hip.Int()].InverseRotation;
 
