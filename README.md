@@ -88,9 +88,24 @@ You can find demo scene at ``./RealTimeSMPL/Scene/RealTimeSMPLX``. Run the scene
 
 If you constructed your own smpl human mesh reconstruction server and configured connection correctly, the smpl mesh's shape changes every time you push down space bar or right-click your mouse.
 
+## Get Repository
+This repository does not contain required libraries (e.g. libmediapipe_c.so, Google.Protobuf.dll, etc). 
+You have to download whole things at [this page]() and extract it anywhere you want, instead of ``git clone``.
+
+// TODO upload an actual download site.
+
 ## Tested Environment
 
-// TODO : notify test envs and demo video-gif
+This repository is based on...
+- Unity 2021.3.18
+- [MediaPipeUnityPlugin_v0.11.0](https://github.com/homuler/MediaPipeUnityPlugin/releases)
+
+
+and tested on
+
+- // TODO : notify test envs
+
+## Demo gif
 
 ------------
 
