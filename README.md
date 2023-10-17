@@ -10,7 +10,7 @@ with real-time estimated 3D pose from a single monocular RGB image
 
 # About
 
-There are so many models estimating human pose with shape reconstruction using smpl-like model.
+There are so many models estimating 3D human mesh with shape reconstruction using smpl-like model.
 [Expose](https://github.com/vchoutas/expose), [VIBE](https://github.com/mkocabas/VIBE), 
 [HuManiFlow](https://github.com/akashsengupta1997/HuManiFlow) are some of those examples. 
 Sometimes, they could reconstruct human pose in real-time quite well.
@@ -39,7 +39,7 @@ Here is an architecture image.
 ### Note that
 You have to maintain your own Smplx Reconstruction Server, if you want to set Smplx body shapes automatically. Those two endpoint would be connected  by TCP.
 
-You can make .txt file containing a hostname(ip addr) and a port number of inference server, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
+You can make .txt file containing a hostname(ipv4 addr) and a port number of shape inference server, and locate it ``./Assets/RealTimeSMPL/ShapeConf/Secrets/`` directory.
 By assigning it to UnitySocketCleint_auto.cs script's IpConf variable,
 it will send an image frame, receive betas and pass it to the target smplx mesh sequentially.
 
@@ -60,16 +60,12 @@ xxx.xxx.xx.xxx
 
 ![req.png](readmeImg%2Freq.png)
 
-<h4 align="center">
-Image Length is followed by Image
-</h4>
-
 - response
 
 ![res.png](readmeImg%2Fres.png)
 
 Those two byte arrays are passed on tcp stream. Request form would be passed on the stream correctly if you assigned valid value on IpConf variable.
-You have to obey response message form when implementing inference server.
+You have to obey response message format when implementing inference server.
 
 -------------
 
@@ -80,6 +76,10 @@ We used [MediaPipe](https://developers.google.com/mediapipe) framework for 3D po
 ![mediaPipeJoints.png](readmeImg%2FmediaPipeJoints.png)
 
 The estimated data contains each joint's rotation angles. 
+Since the skeleton structure and the number of joints in the MediaPipe framework were different from those in SMPL/SMPLX, it was necessary to work on mapping them as closely as possible.
+
+![image](https://github.com/sangho0n/Realtime_SMPLX_Unity/assets/54069713/dabdaad8-e118-4ea0-8826-d5baed88d245)
+
 
 ------------
 
@@ -101,15 +101,21 @@ This repository is based on...
 - [MediaPipeUnityPlugin_v0.11.0](https://github.com/homuler/MediaPipeUnityPlugin/releases)
 
 
-and tested on
+and tested on 
 
-- // TODO : notify test envs
+- OS : Ubuntu 20.04, Windows 10
+- Processor : AMD Ryzen 7 5800X + RTX 3080 Ti / AMD Ryzen 5 4500U with Radeon Graphics
 
-## Demo gif
+[Demo video Youtube link](https://www.youtube.com/watch?v=Tq7Mzuc6t6M)
 
 ------------
 
+# Limitation
+Despite such efforts, it still exhibited less natural movements when inferring and rendering the joints of SMPL/SMPLX meshes in real-time in Python, as shown in the demo video linked below.
+If we can find a way to perform real-time Pose Estimation in Unity that aligns with the skeleton structure used in SMPL, it is likely to yield better results.
 
+
+-------
 # References
 
 - [MediaPipeUnityPlugin github repository](https://github.com/homuler/MediaPipeUnityPlugin)
