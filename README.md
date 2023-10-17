@@ -90,9 +90,7 @@ If you constructed your own smpl human mesh reconstruction server and configured
 
 ## Get Repository
 This repository does not contain required libraries (e.g. libmediapipe_c.so, Google.Protobuf.dll, etc). 
-You have to download whole things at [this page]() and extract it anywhere you want, instead of ``git clone``.
-
-// TODO upload an actual download site.
+You have to download whole things at [this page](https://drive.google.com/file/d/1IJVSCoK0Qc2pnFcfzwbv6qa2Jtz1oMFh/view?usp=sharing) and extract it anywhere you want, instead of ``git clone``.
 
 ## Tested Environment
 
